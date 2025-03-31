@@ -1,4 +1,4 @@
-# Home Assistant Dashboard
+# Home Assistant Dashboard Kindle
 
 This project is a lightweight web-based dashboard for controlling Home Assistant entities such as lights, switches, and gates. It is designed to work on devices with limited browsers, such as the Kindle experimental browser.
 
