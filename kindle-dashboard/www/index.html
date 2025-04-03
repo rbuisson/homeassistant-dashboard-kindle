@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Assistant Controller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000; /* High contrast background */
+            color: #fff; /* High contrast text */
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .card {
+            background-color: #333; /* High contrast card background */
+            border: 1px solid #fff; /* High contrast border */
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .action-button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #000; /* High contrast text on buttons */
+            background-color: #fff; /* High contrast button background */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .action-button.on {
+            background-color: #00ff00; /* Bright green for "on" */
+            color: #000;
+        }
+
+        .action-button.off {
+            background-color: #ff0000; /* Bright red for "off" */
+            color: #000;
+        }
+
+        .action-button:disabled {
+            background-color: #666; /* Gray for disabled buttons */
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #fff; /* High contrast status text */
+        }
+    </style>
+</head>
+<body>
+    <h1>Home Assistant Controller</h1>
+    <div class="container">
+        <!-- Light: Kitchen -->
+        <div class="card">
+            <h2>Light: Kitchen</h2>
+            <button class="action-button" id="light-0x842e14fffe745ca6" onclick="toggleEntity('light.0x842e14fffe745ca6')">Loading...</button>
+            <div class="status" id="status-light-0x842e14fffe745ca6">Loading...</div>
+        </div>
+
+        <!-- Switch: Cour -->
+        <div class="card">
+            <h2>Switch: Cour</h2>
+            <button class="action-button" id="switch-0x70b3d52b60102ad4" onclick="toggleEntity('switch.0x70b3d52b60102ad4')">Loading...</button>
+            <div class="status" id="status-switch-0x70b3d52b60102ad4">Loading...</div>
+        </div>
+
+        <!-- Switch: Gate Relay -->
+        <div class="card">
+            <h2>Switch: Gate Relay</h2>
+            <button class="action-button" id="switch-wave_1pm" onclick="toggleEntity('switch.wave_1pm')">Loading...</button>
+            <div class="status" id="status-switch-wave_1pm">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        const HA_URL = "http://homeassistant.local:8123/api";
+        const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwYTA3YWMzZDEzODk0MGMxYWIyMjA0MjIxNzdjMzNkYyIsImlhdCI6MTc0MzQ1MjU2NiwiZXhwIjoyMDU4ODEyNTY2fQ.8rgPJ5CoUYMF7YT-W8JwSlakZjcRavSNxZ-4SYN1rsw"; // Replace with your token
+
+        const headers = {
+            "Authorization": `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
+        };
+
+        function updateButtonState(entityId, button, status) {
+            fetch(`${HA_URL}/states/${entityId}`, { headers })
+                .then(response => response.json())
+                .then(data => {
+                    const state = data.state;
+                    button.textContent = state === "on" ? "Turn Off" : "Turn On";
+                    button.className = `action-button ${state}`;
+                    button.disabled = false; // Ensure the button is clickable
+                    status.textContent = state === "on" ? "On" : "Off";
+                })
+                .catch(() => {
+                    button.textContent = "Error";
+                    button.disabled = false; // Ensure the button is clickable even on error
+                    status.textContent = "Error";
+                });
+        }
+
+        function toggleEntity(entityId) {
+            const button = document.getElementById(entityId.replace('.', '-'));
+            const status = document.getElementById(`status-${entityId.replace('.', '-')}`);
+            const action = button.classList.contains("on") ? "turn_off" : "turn_on";
+            const domain = entityId.split('.')[0];
+
+            // Immediately update the button text for visual feedback
+            button.textContent = action === "turn_on" ? "Turning On..." : "Turning Off...";
+            button.disabled = true; // Temporarily disable the button to prevent multiple clicks
+            status.textContent = "Updating...";
+
+            fetch(`${HA_URL}/services/${domain}/${action}`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ entity_id: entityId })
+            })
+            .then(() => {
+                // Update the button state 1 second after the action
+                setTimeout(() => updateButtonState(entityId, button, status), 2000);
+            })
+            .catch(() => {
+                alert("Failed to toggle entity");
+                button.disabled = false; // Re-enable the button
+                button.textContent = "Error";
+                status.textContent = "Error";
+            });
+        }
+
+        function refreshAllStates() {
+            document.querySelectorAll(".action-button").forEach(button => {
+                const entityId = button.id.replace('-', '.');
+                const status = document.getElementById(`status-${button.id}`);
+                updateButtonState(entityId, button, status);
+            });
+        }
+
+        // Initialize buttons
+        document.querySelectorAll(".action-button").forEach(button => {
+            const entityId = button.id.replace('-', '.');
+            const status = document.getElementById(`status-${button.id}`);
+            button.disabled = true; // Disable the button until the state is fetched
+            updateButtonState(entityId, button, status);
+        });
+
+        // Periodically refresh all states every 5 seconds
+        setInterval(refreshAllStates, 5000);
+    </script>
+</body>
+</html>
