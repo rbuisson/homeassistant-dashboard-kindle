@@ -32,34 +32,22 @@
             border-radius: 5px;
             padding: 15px;
             text-align: center;
-            box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.1);
         }
 
         .action-button {
             display: inline-block;
             padding: 10px 20px;
             font-size: 1rem;
-            color: #000; /* High contrast text on buttons */
-            background-color: #fff; /* High contrast button background */
-            border: none;
+            background-color: transparent; /* No colors */
+            border: 1px solid #fff; /* High contrast border */
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .action-button.on {
-            background-color: #00ff00; /* Bright green for "on" */
-            color: #000;
-        }
-
-        .action-button.off {
-            background-color: #ff0000; /* Bright red for "off" */
-            color: #000;
+            color: #fff; /* High contrast text */
         }
 
         .action-button:disabled {
-            background-color: #666; /* Gray for disabled buttons */
-            color: #fff;
+            border-color: #666; /* Gray for disabled buttons */
+            color: #666;
             cursor: not-allowed;
         }
 
@@ -93,6 +81,7 @@
             <button class="action-button" id="switch-wave_1pm" onclick="toggleEntity('switch.wave_1pm')">Loading...</button>
             <div class="status" id="status-switch-wave_1pm">Loading...</div>
         </div>
+
     </div>
 
     <script>
@@ -110,7 +99,6 @@
                 .then(data => {
                     const state = data.state;
                     button.textContent = state === "on" ? "Turn Off" : "Turn On";
-                    button.className = `action-button ${state}`;
                     button.disabled = false; // Ensure the button is clickable
                     status.textContent = state === "on" ? "On" : "Off";
                 })
@@ -124,7 +112,7 @@
         function toggleEntity(entityId) {
             const button = document.getElementById(entityId.replace('.', '-'));
             const status = document.getElementById(`status-${entityId.replace('.', '-')}`);
-            const action = button.classList.contains("on") ? "turn_off" : "turn_on";
+            const action = button.textContent.includes("Off") ? "turn_off" : "turn_on";
             const domain = entityId.split('.')[0];
 
             // Immediately update the button text for visual feedback

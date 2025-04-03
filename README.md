@@ -1,4 +1,4 @@
-# Kindle Web Controller
+# Kindle Dashboard
 
 A simple web interface to control Home Assistant entities, optimized for Kindle devices. This addon provides a high-contrast interface with buttons to toggle lights, switches, and relays.
 
@@ -8,7 +8,7 @@ A simple web interface to control Home Assistant entities, optimized for Kindle 
 - Simple buttons to toggle entity states (e.g., turn lights on/off).
 
 ## Installation
-1. Copy the `my-addon` folder into your Home Assistant `addons` directory.
+1. Copy the `kindle-dashboard` folder into your Home Assistant `addons` directory.
 2. Restart Home Assistant to detect the new addon.
 3. Install the addon from the **Add-on Store** in the Home Assistant UI.
 
@@ -23,6 +23,10 @@ No additional configuration is required. The addon uses the Home Assistant API t
 ## Development
 - The web interface is served using a simple Python HTTP server.
 - The frontend is written in HTML, CSS, and JavaScript.
+- For development purposes, you can mount the `index.html` file as a volume:
+  ```bash
+  docker run -p 8080:8080 -v /path/to/your/index.html:/app/www/index.html kindle-dashboard
+  ```
 
 ## Notes
 - Ensure your Home Assistant instance allows API access with a valid long-lived access token.
