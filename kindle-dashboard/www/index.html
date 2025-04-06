@@ -114,11 +114,10 @@
             error: "Erreur"
         };
 
-        const HA_URL = "http://homeassistant.local:8123/api";
-        const TOKEN = ""; // Replace with your token
+        const HA_URL = "/api";  // Changed to use Home Assistant API proxy
+        const TOKEN = "";  // No token needed when using the API proxy with hassio_api: true
 
         const headers = {
-            "Authorization": `Bearer ${TOKEN}`,
             "Content-Type": "application/json"
         };
 
