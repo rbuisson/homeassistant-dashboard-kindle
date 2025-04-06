@@ -345,5 +345,15 @@
             setInterval(refreshAllStates, 5000);
         });
     </script>
+    <script>
+        // Use direct access to Home Assistant API with a token
+        const HA_URL = "http://homeassistant.local:8123/api";
+        const TOKEN = "";
+        
+        const headers = {
+            "Authorization": `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
+        };
+    </script>
 </body>
 </html>
